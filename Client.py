@@ -6,11 +6,14 @@ from dash import dcc
 #import dash_core_components as dcc
 import plotly.express as px
 from dash.dependencies import Input, Output
+import HtmlBuilder as hb
 
 app = dash.Dash()
 df = px.data.stocks()
 
 app.layout = html.Div(id = 'parent', children = [
+    hb.buildNodeCell("DESKTOP-8GFDG8"),
+    hb.buildCpuUtilCell({1:12,2:14,3:2,4:11},str(3.5),"DESKTOP-8GFDG8"),
     html.H1(id = 'H1', children = 'Styling using html components', style = {'textAlign':'center',\
                                             'marginTop':40,'marginBottom':40}),
 
