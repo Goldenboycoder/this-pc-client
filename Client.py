@@ -15,7 +15,31 @@ app.layout = html.Div(id = 'parent', children = [
     
     hb.buildRow(pcname="DESKTOP-8GFDG8",cells=[
         hb.buildCpuUtilCell({1:12,2:14,3:2,4:11},str(3.5),"DESKTOP-8GFDG8"),
-        hb.buildCpuLoadCell({'min1':4,'min5':10,'min15':20},pcname="DESKTOP-8GFDG8")
+        hb.buildCpuLoadCell({'min1':4,'min5':10,'min15':20},pcname="DESKTOP-8GFDG8"),
+        hb.buildMemoryCell(
+            {
+                'total':'16GB',
+                'available':'5GB',
+                'percentUsage':50
+            },
+            pcname="DESKTOP-8GFDG8"),
+        hb.buildNetIoCell(
+            {
+                'errin':555,
+                'errout':333,
+                'dropin':222,
+                'dropout':111
+            },
+            pcname="DESKTOP-8GFDG8"),
+        hb.buildDiskCell(
+            {
+                'fileSystemType':'NTFS',
+                'total':'1TB',
+                'free':'500GB',
+                'used':'500GB'
+            },
+            pcname="DESKTOP-8GFDG8",partition='C:\\'
+        )
     ])
 ])
 

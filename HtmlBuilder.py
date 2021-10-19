@@ -126,7 +126,7 @@ def buildMemoryCell(memoryDict,pcname):
         },
         children=[
             html.H5(
-                style={"text-align": "left",'margin-bottom': '5px',},
+                style={"text-align": "left",'margin-bottom': '80px',},
                 children="CPU Load"
             ),
             html.Label(
@@ -147,6 +147,86 @@ def buildMemoryCell(memoryDict,pcname):
     )
     return container
 
+
+def buildNetIoCell(netioDict,pcname):
+    container = html.Div(
+        className="net",
+        id="net-"+pcname,
+        style={
+            'display': 'inline-block',
+            'margin-right': '3cm',
+            'margin-bottom': '1cm',
+            'text-align': 'left',
+            'vertical-align': 'top',
+        },
+        children=[
+            html.H5(
+                style={"text-align": "left",'margin-bottom': '80px',},
+                children="Network I/O"
+            ),
+            html.Label(
+                id="net-ein-"+pcname,
+                children="Error In: {}".format(netioDict['errin'])
+            ),
+            html.Br(),
+            html.Label(
+                id='net-eout-'+pcname,
+                children="Error Out: {}".format(netioDict['errout'])
+            ),
+            html.Br(),
+            html.Label(
+                id='net-din-'+pcname,
+                children="Droped In: {}".format(netioDict['dropin'])
+            ),
+            html.Br(),
+            html.Label(
+                id="net-dout-"+pcname,
+                children="Drop Out: {}".format(netioDict['dropout'])
+            ),
+            
+        ]
+    )
+    return container
+
+
+def buildDiskCell(diskDisct,pcname,partition):
+    container = html.Div(
+        className="disk",
+        id="disk-{}-{}".format(partition,pcname),
+        style={
+            'display': 'inline-block',
+            'margin-right': '3cm',
+            'margin-bottom': '1cm',
+            'text-align': 'left',
+            'vertical-align': 'top',
+        },
+        children=[
+            html.H5(
+                style={"text-align": "left",'margin-bottom': '80px',},
+                children="Partition {}".format(partition)
+            ),
+            html.Label(
+                id="fsys-{}-{}".format(partition,pcname),
+                children="File System Type: {}".format(diskDisct['fileSystemType'])
+            ),
+            html.Br(),
+            html.Label(
+                id='total-{}-{}'.format(partition,pcname),
+                children="Total: {}".format(diskDisct['total'])
+            ),
+            html.Br(),
+            html.Label(
+                id='free-{}-{}'.format(partition,pcname),
+                children="Free: {}".format(diskDisct['free'])
+            ),
+            html.Br(),
+            html.Label(
+                id="used-{}-{}".format(partition,pcname),
+                children="Used: {}".format(diskDisct['used'])
+            )
+        ]
+    )
+    return container
 
 
 def buildRow(pcname,cells):
