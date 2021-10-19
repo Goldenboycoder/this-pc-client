@@ -55,7 +55,7 @@ def buildCpuUtilCell(cpuUtilDict , cpuFreq,pcname):
             'text-align': 'left',
             'vertical-align': 'top',
             'width':'300px',
-            'height':'250px'
+            'height':'290px'
         },
         children=[
             html.H5(
@@ -76,6 +76,101 @@ def buildCpuUtilCell(cpuUtilDict , cpuFreq,pcname):
                     html.Label(children="Freq: "),
                     html.Label(id="cpufreq-"+pcname,children=cpuFreq)
                 ]
+            )
+        ]
+    )
+    return container
+
+def buildCpuLoadCell(cpuLoadDisct,pcname):
+    df = pd.DataFrame(list(cpuLoadDisct.items()))
+    fig = px.line(df,y=1,x=0,width=300,height=250)
+    container = html.Div(
+        className="cpuload",
+        id="cpuload-"+pcname,
+        style={
+            'display': 'inline-block',
+            'margin-right': '3cm',
+            'margin-bottom': '1cm',
+            'text-align': 'left',
+            'vertical-align': 'top',
+            'width':'300px',
+            'height':'290px'
+        },
+        children=[
+            html.H5(
+                style={"text-align": "left",'margin-bottom': '5px',},
+                children="CPU Load"
+            ),
+            dcc.Graph(id="cpuloadG-"+pcname ,figure=fig,config={
+                "displayModeBar":False,
+                "displaylogo":False,
+                "autosizable": False,
+                "fillFrame" : False,
+                },
+                responsive=False,
+            )
+        ]
+    )
+    return container
+
+def buildMemoryCell(memoryDict,pcname):
+    container = html.Div(
+        className="memory",
+        id="memory-"+pcname,
+        style={
+            'display': 'inline-block',
+            'margin-right': '3cm',
+            'margin-bottom': '1cm',
+            'text-align': 'left',
+            'vertical-align': 'top',
+        },
+        children=[
+            html.H5(
+                style={"text-align": "left",'margin-bottom': '5px',},
+                children="CPU Load"
+            ),
+            html.Label(
+                id="memory-total-"+pcname,
+                children="Total: {}".format(memoryDict['total'])
+            ),
+            html.Br(),
+            html.Label(
+                id='memory-available-'+pcname,
+                children="Available: {}".format(memoryDict['available'])
+            ),
+            html.Br(),
+            html.Label(
+                id='memory-percent-'+pcname,
+                children="Percent Usage: {}".format(memoryDict['percentUsage'])
+            )
+        ]
+    )
+    return container
+
+
+
+def buildRow(pcname,cells):
+    container = html.Div(
+        className="Row",
+        id="row-"+pcname,
+        style={
+            'display': 'inline-block',
+            'overflow': 'hidden',
+            'white-space': 'nowrap',
+            'width':'100%'
+        },
+        children=[
+            buildNodeCell(pcname),
+            html.Div(
+                className="ScrollableRow",
+                id="srow-"+pcname,
+                style={
+                    'display': 'inline-block',
+                    'overflow-x': 'scroll',
+                    'white-space': 'nowrap',
+                    'width':'100%'
+                },
+                children=cells
             )
         ]
     )
