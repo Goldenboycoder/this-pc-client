@@ -3,11 +3,13 @@ import redis
 import pickle
 import config
 from collections import deque
+import threading
 
 class RedisClientConnection:
 
     def __init__(self,subPattern):
-        self.messageQueue = deque()
+        self.messageQueue = {}
+        self.Lock = threading.Lock()
         self.cache = redis.Redis(host= config.CacheHost , port= config.CachePort)
         self.subListener = self.cache.pubsub(ignore_subscribe_messages=True)
         self.psub(subPattern)
@@ -19,10 +21,15 @@ class RedisClientConnection:
         try:
             if message['type'] == 'pmessage':
                 data = pickle.loads(message["data"])
-                data["PcName"] = message["channel"].decode('utf-8')[3:]
+                pcname = message["channel"].decode('utf-8')[3:]
+                data["pcname"] = message["channel"].decode('utf-8')[3:]
                 print("from handler")
                 print(data)
-                self.messageQueue.append(data)
+                with self.Lock:
+                    if pcname not in self.messageQueue:
+                        self.messageQueue[pcname]=deque([data])
+                    else:
+                        self.messageQueue[pcname].append(data)
         except Exception as e:
             print(e)
             self.listenerThread.stop()

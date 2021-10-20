@@ -5,10 +5,11 @@ redis = RedisClientConnection("PC-*")
 #redis.lopp()
 
 while(True):
-    time.sleep(2)
     try:
-        data = redis.messageQueue.popleft()
+        with redis.Lock:
+            data = redis.messageQueue.popleft()
         print("from main")
         print(data)
     except Exception as e:
         print(e)
+    time.sleep(2)

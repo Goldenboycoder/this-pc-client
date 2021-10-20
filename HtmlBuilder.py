@@ -127,7 +127,7 @@ def buildMemoryCell(memoryDict,pcname):
         children=[
             html.H5(
                 style={"text-align": "left",'margin-bottom': '80px',},
-                children="CPU Load"
+                children="Memory"
             ),
             html.Label(
                 id="memory-total-"+pcname,
