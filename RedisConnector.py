@@ -29,7 +29,11 @@ class RedisClientConnection:
                     if pcname not in self.messageQueue:
                         self.messageQueue[pcname]=deque([data])
                     else:
-                        self.messageQueue[pcname].append(data)
+                        if len(self.messageQueue[pcname])>=3:
+                            _ = self.messageQueue[pcname].popleft()
+                            self.messageQueue[pcname].append(data)
+                        else:
+                            self.messageQueue[pcname].append(data)
         except Exception as e:
             print(e)
             self.listenerThread.stop()
@@ -39,3 +43,14 @@ class RedisClientConnection:
 
     def psub(self,pattern):
         self.subListener.psubscribe(**{pattern : self.messageHandler})
+    
+    def getPcData(self,pcname):
+        with self.Lock:
+            return self.messageQueue[pcname].popleft()
+    
+    def getAllNodesData(self):
+        nodesData = {}
+        with self.Lock:
+            for pc in self.messageQueue:
+                nodesData[pc] = self.messageQueue[pc].popleft()
+        return nodesData
