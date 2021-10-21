@@ -7,18 +7,20 @@ from dash import dcc
 import plotly.express as px
 from dash.dependencies import Input, Output
 import HtmlBuilder as hb
-import RedisConnector
+from RedisConnector import RedisClientConnection
 from time import sleep
+from dash.exceptions import PreventUpdate
+
 
 app = dash.Dash()
 df = px.data.stocks()
-redis = RedisConnector("PC-*")
-
+redis = RedisClientConnection("PC-*")
+sleep(20)
 def init():
-    sleep(10)
     nodesData = redis.getAllNodesData()
     rows=[]
-    
+    if nodesData is None:
+        return None
     for pc in nodesData:
         partitionsCells=[]
         for part in nodesData[pc]['disks']:
@@ -26,21 +28,28 @@ def init():
                 hb.buildDiskCell(nodesData[pc]['disks'][part],pc,part)
             )
 
-        row = hb.buildRow(pcname=pc,cells=[
+        cels = [
             hb.buildCpuUtilCell(nodesData[pc]['cpuUtil'],str(nodesData[pc]['cpuFreq']),pc),
             hb.buildCpuLoadCell(nodesData[pc]['cpuLoad'],pcname=pc),
             hb.buildMemoryCell(nodesData[pc]['memory'],pcname=pc),
             hb.buildNetIoCell(nodesData[pc]['netIO'],pcname=pc)
-        ].extend(partitionsCells))
+        ]
+        cels.extend(partitionsCells)
+        
+        row = hb.buildRow(pcname=pc,cells=cels)
         rows.append(row)
 
-    app.layout = html.Div(id = 'parent', children = [
+    childs = [
         dcc.Interval(
             id='interval-component',
-            interval=5*1000, # in milliseconds
+            interval=20*1000, # in milliseconds
             n_intervals=0
-        )
-    ].append(html.Div(id = 'container', children =rows)))
+        ),
+        html.Div(id = 'container', children =rows)
+    ]
+    return html.Div(id = 'parent', children = childs)
+
+app.layout = init
 
 
 """
@@ -92,26 +101,30 @@ def prepUdpate():
 def interval_update(n):
     rows=[]
     nodesData = redis.getAllNodesData()
-    
-    for pc in nodesData:
-        partitionsCells=[]
-        for part in nodesData[pc]['disks']:
-            partitionsCells.append(
-                hb.buildDiskCell(nodesData[pc]['disks'][part],pc,part)
-            )
-
-        row = hb.buildRow(pcname=pc,cells=[
-            hb.buildCpuUtilCell(nodesData[pc]['cpuUtil'],str(nodesData[pc]['cpuFreq']),pc),
-            hb.buildCpuLoadCell(nodesData[pc]['cpuLoad'],pcname=pc),
-            hb.buildMemoryCell(nodesData[pc]['memory'],pcname=pc),
-            hb.buildNetIoCell(nodesData[pc]['netIO'],pcname=pc)
-        ].extend(partitionsCells))
-        rows.append(row)
-        
-    return rows  
+    if nodesData is None:
+        raise PreventUpdate
+    else:
+        for pc in nodesData:
+            partitionsCells=[]
+            for part in nodesData[pc]['disks']:
+                partitionsCells.append(
+                    hb.buildDiskCell(nodesData[pc]['disks'][part],pc,part)
+                )
+            cels = [
+                hb.buildCpuUtilCell(nodesData[pc]['cpuUtil'],str(nodesData[pc]['cpuFreq']),pc),
+                hb.buildCpuLoadCell(nodesData[pc]['cpuLoad'],pcname=pc),
+                hb.buildMemoryCell(nodesData[pc]['memory'],pcname=pc),
+                hb.buildNetIoCell(nodesData[pc]['netIO'],pcname=pc)
+            ]
+            cels.extend(partitionsCells)
+            
+            row = hb.buildRow(pcname=pc,cells=cels)
+            rows.append(row)
+            
+        return rows  
 
 
 
 if __name__ == '__main__': 
-    init()
-    app.run_server()
+    #init()
+    app.run_server(debug=True)

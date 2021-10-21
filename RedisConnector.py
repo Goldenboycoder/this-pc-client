@@ -50,7 +50,11 @@ class RedisClientConnection:
     
     def getAllNodesData(self):
         nodesData = {}
-        with self.Lock:
-            for pc in self.messageQueue:
-                nodesData[pc] = self.messageQueue[pc].popleft()
-        return nodesData
+        try:
+            with self.Lock:
+                for pc in self.messageQueue:
+                    nodesData[pc] = self.messageQueue[pc].popleft()
+            return nodesData
+        except Exception as e:
+            print(e)
+            return None
