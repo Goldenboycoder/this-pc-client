@@ -34,7 +34,13 @@ def init():
         ].extend(partitionsCells))
         rows.append(row)
 
-    app.layout = html.Div(id = 'parent', children = rows)
+    app.layout = html.Div(id = 'parent', children = [
+        dcc.Interval(
+            id='interval-component',
+            interval=5*1000, # in milliseconds
+            n_intervals=0
+        )
+    ].append(html.Div(id = 'container', children =rows)))
 
 
 """
@@ -71,19 +77,38 @@ app.layout = html.Div(id = 'parent', children = [
     ])
 """
 
-@app.callback(Output(component_id='bar_plot', component_property= 'figure'),
-              [Input(component_id='dropdown', component_property= 'value')])
-def graph_update(dropdown_value):
-    print(dropdown_value)
-    fig = go.Figure([go.Scatter(x = df['date'], y = df['{}'.format(dropdown_value)],\
-                     line = dict(color = 'firebrick', width = 4))
-                     ])
+def prepUdpate():
+    outputs={}
+
+
+    return outputs
+
+
+
+@app.callback(
+    output = Output(component_id='container', component_property= 'children'),
+    inputs=Input('interval-component', 'n_intervals')
+)
+def interval_update(n):
+    rows=[]
+    nodesData = redis.getAllNodesData()
     
-    fig.update_layout(title = 'Stock prices over time',
-                      xaxis_title = 'Dates',
-                      yaxis_title = 'Prices'
-                      )
-    return fig  
+    for pc in nodesData:
+        partitionsCells=[]
+        for part in nodesData[pc]['disks']:
+            partitionsCells.append(
+                hb.buildDiskCell(nodesData[pc]['disks'][part],pc,part)
+            )
+
+        row = hb.buildRow(pcname=pc,cells=[
+            hb.buildCpuUtilCell(nodesData[pc]['cpuUtil'],str(nodesData[pc]['cpuFreq']),pc),
+            hb.buildCpuLoadCell(nodesData[pc]['cpuLoad'],pcname=pc),
+            hb.buildMemoryCell(nodesData[pc]['memory'],pcname=pc),
+            hb.buildNetIoCell(nodesData[pc]['netIO'],pcname=pc)
+        ].extend(partitionsCells))
+        rows.append(row)
+        
+    return rows  
 
 
 
