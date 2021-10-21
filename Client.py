@@ -113,4 +113,5 @@ def interval_update(n):
 
 
 if __name__ == '__main__': 
+    init()
     app.run_server()
