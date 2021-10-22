@@ -82,7 +82,7 @@ def buildCpuUtilCell(cpuUtilDict , cpuFreq,pcname):
     return container
 
 def buildCpuLoadCell(cpuLoadDisct,pcname):
-    df = pd.DataFrame(list(cpuLoadDisct.items()))
+    df = pd.DataFrame(list(cpuLoadDisct.items()).reverse())
     fig = px.line(df,y=1,x=0,width=300,height=250)
     container = html.Div(
         className="cpuload",
