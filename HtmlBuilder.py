@@ -193,7 +193,7 @@ def buildDiskCell(diskDisct,pcname,partition):
         id="disk-{}-{}".format(partition,pcname),
         style={
             'display': 'inline-block',
-            'margin-right': '3cm',
+            'margin-right': '7cm',
             'margin-bottom': '1cm',
             'text-align': 'left',
             'vertical-align': 'top',
