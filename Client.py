@@ -1,9 +1,7 @@
 import dash
 from dash import html
-#import dash_html_components as html
 import plotly.graph_objects as go
 from dash import dcc
-#import dash_core_components as dcc
 import plotly.express as px
 from dash.dependencies import Input, Output
 import HtmlBuilder as hb
@@ -13,10 +11,15 @@ from dash.exceptions import PreventUpdate
 
 
 app = dash.Dash()
-df = px.data.stocks()
 redis = RedisClientConnection("PC-*")
-sleep(20)
+
+sleep(20) # sleep for redis data to arrive
+
 def init():
+    '''
+    Get redis data and generate web page on refresh/first load
+    '''
+
     nodesData = redis.getAllNodesData()
     rows=[]
     if nodesData is None:
@@ -52,46 +55,6 @@ def init():
 app.layout = init
 
 
-"""
-app.layout = html.Div(id = 'parent', children = [
-        
-        hb.buildRow(pcname="DESKTOP-8GFDG8",cells=[
-            hb.buildCpuUtilCell({1:12,2:14,3:2,4:11},str(3.5),"DESKTOP-8GFDG8"),
-            hb.buildCpuLoadCell({'min1':4,'min5':10,'min15':20},pcname="DESKTOP-8GFDG8"),
-            hb.buildMemoryCell(
-                {
-                    'total':'16GB',
-                    'available':'5GB',
-                    'percentUsage':50
-                },
-                pcname="DESKTOP-8GFDG8"),
-            hb.buildNetIoCell(
-                {
-                    'errin':555,
-                    'errout':333,
-                    'dropin':222,
-                    'dropout':111
-                },
-                pcname="DESKTOP-8GFDG8"),
-            hb.buildDiskCell(
-                {
-                    'fileSystemType':'NTFS',
-                    'total':'1TB',
-                    'free':'500GB',
-                    'used':'500GB'
-                },
-                pcname="DESKTOP-8GFDG8",partition='C:\\'
-            )
-        ])
-    ])
-"""
-
-def prepUdpate():
-    outputs={}
-
-
-    return outputs
-
 
 
 @app.callback(
@@ -99,6 +62,10 @@ def prepUdpate():
     inputs=Input('interval-component', 'n_intervals')
 )
 def interval_update(n):
+    '''
+    Update web page with the new redis data from the buffer.\n
+    If no data is found prevent update to web page.
+    '''
     rows=[]
     nodesData = redis.getAllNodesData()
     if nodesData is None:
@@ -126,5 +93,4 @@ def interval_update(n):
 
 
 if __name__ == '__main__': 
-    #init()
     app.run_server(debug=True)

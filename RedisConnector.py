@@ -8,7 +8,7 @@ import threading
 class RedisClientConnection:
 
     def __init__(self,subPattern):
-        self.messageQueue = {}
+        self.messageQueue = {} #buffer
         self.Lock = threading.Lock()
         self.cache = redis.Redis(host= config.CacheHost , port= config.CachePort)
         self.subListener = self.cache.pubsub(ignore_subscribe_messages=True)
@@ -17,14 +17,17 @@ class RedisClientConnection:
 
 
     def messageHandler(self,message):
-        print("handeling")
+        '''
+        Handles incomming data from redis and addes them to the buffer
+        '''
+        #print("handeling")
         try:
             if message['type'] == 'pmessage':
                 data = pickle.loads(message["data"])
                 pcname = message["channel"].decode('utf-8')[3:]
                 data["pcname"] = message["channel"].decode('utf-8')[3:]
-                print("from handler")
-                print(data)
+                #print("from handler")
+                #print(data)
                 with self.Lock:
                     if pcname not in self.messageQueue:
                         self.messageQueue[pcname]=deque([data])
@@ -49,6 +52,9 @@ class RedisClientConnection:
             return self.messageQueue[pcname].popleft()
     
     def getAllNodesData(self):
+        '''
+        Returns removes and returns data from the buffer 
+        '''
         nodesData = {}
         try:
             with self.Lock:
